@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World's Finest Chocolate Sales</title>
+  <style>
+    body{margin:0;background:#edf2f8;font-family:Arial,Helvetica,sans-serif;color:#243142}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .card{background:#fff;border:1px solid #d9e2f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .hero{padding:28px;background:#4f81bc;color:#fff;text-align:center}
+    .hero h1{margin:0;font-size:34px}
+    .hero p{margin:10px 0 0;line-height:1.6;font-size:16px}
+    .hero-image{padding:18px;background:#f8fbff;border-bottom:1px solid #d9e2f0;text-align:center}
+    .hero-image img{max-width:100%;max-height:240px;border-radius:10px;border:1px solid #d9e2f0;background:#fff}
+    .hero-placeholder{padding:40px 20px;border:2px dashed #cbd5e1;border-radius:10px;color:#667085;background:#fff}
+    .section{padding:22px}
+    .note{background:#f4f8ff;border:1px solid #d3dff3;border-radius:8px;padding:16px;line-height:1.65;font-size:14px;margin-bottom:18px}
+    .warn{background:#fff5f5;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:14px;line-height:1.6;font-size:14px;margin-top:14px}
+    .sales-table{width:100%;border-collapse:collapse}
+    .sales-table th,.sales-table td{padding:12px 10px;border-bottom:1px solid #e6edf5;vertical-align:middle}
+    .sales-table th{background:#f8fbff;text-align:left;font-size:14px}
+    .bar-pic{width:64px;height:64px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#667085;font-size:11px;text-align:center}
+    .bar-pic img{width:100%;height:100%;object-fit:cover}
+    .qty-wrap{display:flex;align-items:center;gap:8px}
+    .qty-btn{width:36px;height:36px;border-radius:8px;border:0;background:#5E85C4;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+    .qty-input{width:68px;text-align:center;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
+    .money{font-weight:700}
+    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+    .tot-card{border:1px solid #d9e2f0;border-radius:10px;padding:16px;background:#f8fbff}
+    .tot-label{font-size:13px;color:#667085;margin-bottom:6px}
+    .tot-value{font-size:28px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+    label{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
+    input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px;box-sizing:border-box;background:#fff}
+    .radios{display:flex;gap:10px;flex-wrap:wrap}
+    .radios label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;margin:0}
+    .radios input{width:auto}
+    .full{grid-column:1 / -1}
+    .hint{font-size:12px;color:#667085;line-height:1.5;margin-top:4px}
+    .hidden{display:none}
+    .previewWrap{display:none;margin-top:10px}
+    .previewWrap img{max-width:100%;max-height:220px;border:1px solid #cbd5e1;border-radius:8px}
+    .buttonRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    button.submit-btn{background:#5E85C4;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+    button.reset-btn{background:#e7eef9;color:#1f4e78;border:0;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+    .status{margin-top:14px;font-size:14px}
+    .success{display:none;margin-top:18px;background:#eefbf2;border:1px solid #b9e7c5;color:#0b7a34;border-radius:10px;padding:18px;line-height:1.7}
+    .footer{padding:18px 22px;text-align:center;font-size:13px;line-height:1.6;color:#666;border-top:1px solid #d9e2f0;margin-top:24px}
+    @media (max-width:900px){
+      .totals{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .sales-table th:nth-child(3), .sales-table td:nth-child(3){min-width:130px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="hero">
+      <h1>World's Finest Chocolate Sales</h1>
+      <p>Track candy bar sales, calculate totals and change due, and optionally send a receipt by email or text.</p>
+    </div>
+
+    <div class="hero-image">
+      <div id="heroPlaceholder" class="hero-placeholder">Add your hero image URL in the HTML file to display an image here.</div>
+      <img id="heroImage" alt="Hero image" class="hidden">
+    </div>
+
+    <div class="section">
+      <div class="note">
+        Each bar is priced at <strong>$2.00</strong>. Use the plus and minus buttons or type the quantity directly. For check or money order payments, upload a clear photo of the front.
+      </div>
+
+      <form id="salesForm">
+        <table class="sales-table">
+          <thead>
+            <tr>
+              <th style="width:84px;">Photo</th>
+              <th>Flavor</th>
+              <th style="width:160px;">Quantity</th>
+              <th style="width:120px;">Price</th>
+              <th style="width:140px;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="salesRows"></tbody>
+        </table>
+
+        <div class="totals">
+          <div class="tot-card">
+            <div class="tot-label">Bars Sold</div>
+            <div class="tot-value" id="barsSold">0</div>
+          </div>
+          <div class="tot-card">
+            <div class="tot-label">Grand Total</div>
+            <div class="tot-value" id="grandTotal">$0.00</div>
+          </div>
+          <div class="tot-card">
+            <div class="tot-label">Change Due</div>
+            <div class="tot-value" id="changeDue">$0.00</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <label>Payment Type</label>
+            <div class="radios">
+              <label><input type="radio" name="paymentType" value="Cash" checked> Cash</label>
+              <label><input type="radio" name="paymentType" value="Check"> Check</label>
+              <label><input type="radio" name="paymentType" value="Money Order"> Money Order</label>
+            </div>
+          </div>
+
+          <div id="cashWrap">
+            <label for="cashTendered">Cash Tendered</label>
+            <input id="cashTendered" inputmode="decimal" placeholder="$0.00">
+            <div class="hint">Enter the amount of cash received to calculate change due.</div>
+          </div>
+
+          <div id="checkNumberWrap" class="hidden">
+            <label for="checkNumber">Check / Money Order Number</label>
+            <input id="checkNumber" maxlength="40" placeholder="Letters, numbers, and hyphens only">
+          </div>
+
+          <div id="checkPhotoWrap" class="hidden">
+            <label for="checkPhoto">Photo of Front of Check / Money Order</label>
+            <input id="checkPhoto" type="file" accept="image/*" capture="environment">
+            <div class="previewWrap" id="checkPreviewWrap"><img id="checkPreview" alt="Preview"></div>
+          </div>
+
+          <div class="full">
+            <label>Send Receipt?</label>
+            <div class="radios">
+              <label><input type="radio" name="receiptType" value="None" checked> No Receipt</label>
+              <label><input type="radio" name="receiptType" value="Email"> Email Receipt</label>
+              <label><input type="radio" name="receiptType" value="Text"> Text Receipt</label>
+            </div>
+          </div>
+
+          <div id="receiptEmailWrap" class="hidden">
+            <label for="receiptEmail">Receipt Email</label>
+            <input id="receiptEmail" type="email" placeholder="customer@example.com">
+          </div>
+
+          <div id="receiptPhoneWrap" class="hidden">
+            <label for="receiptPhone">Receipt Phone Number</label>
+            <input id="receiptPhone" inputmode="numeric" maxlength="14" placeholder="(555)123-4567">
+          </div>
+
+          <div class="full">
+            <label for="sellerName">Seller Name</label>
+            <input id="sellerName" placeholder="Enter the child's name" required>
+          </div>
+
+          <div class="buttonRow full">
+            <button type="submit" class="submit-btn">Complete Sale</button>
+            <button type="button" class="reset-btn" id="resetBtn">Reset Form</button>
+          </div>
+
+          <div class="full">
+            <div id="status" class="status"></div>
+            <div id="warningBox" class="warn hidden"></div>
+          </div>
+        </div>
+      </form>
+
+      <div id="successBox" class="success"></div>
+    </div>
+
+    <div class="footer">
+      <strong>World's Finest Chocolate Sales</strong><br>
+      Created and developed by <strong>Mark Point</strong> of <strong>That Tech Guy</strong>.<br>
+      © 2026 That Tech Guy. All Rights Reserved.
+    </div>
+  </div>
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_XJebNlBQj641dwXnLw6BsbSJV2WIAPALrhX_MFK__NT3_05ap-LA_uED9efieXHb/exec";
+const HERO_IMAGE_URL = "https://cdn.prod.website-files.com/69c4f16e32c2a680a5f0fb18/69c51a199a3181fbabe071d2_wfc_discover_img2.png";
+const PRICE_PER_BAR = 2.00;
+
+const FLAVORS = [
+  { key: "pretzel", label: "Pretzel", color: "#8b5cf6", imageUrl: "REPLACE_WITH_PRETZEL_IMAGE_URL" },
+  { key: "crisp", label: "Crisp", color: "#ef4444", imageUrl: "REPLACE_WITH_CRISP_IMAGE_URL" },
+  { key: "milk_chocolate", label: "Milk Chocolate", color: "#2563eb", imageUrl: "REPLACE_WITH_MILK_CHOCOLATE_IMAGE_URL" },
+  { key: "caramel", label: "Caramel", color: "#f97316", imageUrl: "REPLACE_WITH_CARAMEL_IMAGE_URL" },
+  { key: "almond", label: "Almond", color: "#22c55e", imageUrl: "REPLACE_WITH_ALMOND_IMAGE_URL" }
+];
+
+let checkPhotoData = "";
+
+function initHero() {
+  const heroImg = document.getElementById("heroImage");
+  const placeholder = document.getElementById("heroPlaceholder");
+  if (HERO_IMAGE_URL && !HERO_IMAGE_URL.startsWith("REPLACE_WITH")) {
+    heroImg.src = HERO_IMAGE_URL;
+    heroImg.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+  }
+}
+
+function initRows() {
+  const tbody = document.getElementById("salesRows");
+  tbody.innerHTML = FLAVORS.map(f => `
+    <tr data-key="${f.key}">
+      <td>
+        <div class="bar-pic">
+          ${f.imageUrl.startsWith("REPLACE_WITH") ? "Add Photo" : `<img src="${f.imageUrl}" alt="${escapeHtml(f.label)}">`}
+        </div>
+      </td>
+      <td><strong>${escapeHtml(f.label)}</strong></td>
+      <td>
+        <div class="qty-wrap">
+          <button type="button" class="qty-btn" data-action="minus" data-key="${f.key}">−</button>
+          <input class="qty-input qty-field" data-key="${f.key}" value="0" inputmode="numeric">
+          <button type="button" class="qty-btn" data-action="plus" data-key="${f.key}">+</button>
+        </div>
+      </td>
+      <td class="money">$${PRICE_PER_BAR.toFixed(2)}</td>
+      <td class="money subtotal" data-key="${f.key}">$0.00</td>
+    </tr>
+  `).join("");
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function parseMoney(value) {
+  const cleaned = String(value || "").replace(/[^\d.]/g, "");
+  if (!cleaned) return 0;
+  const num = Number(cleaned);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function formatMoneyInput(el) {
+  const num = parseMoney(el.value);
+  if (!num) {
+    el.value = "";
+    return;
+  }
+  el.value = "$" + num.toFixed(2);
+}
+
+function formatPhone(val) {
+  let d = String(val || "").replace(/\D/g, "").slice(0, 10);
+  if (!d) return "";
+  if (d.length < 4) return "(" + d;
+  if (d.length < 7) return "(" + d.slice(0,3) + ")" + d.slice(3);
+  return "(" + d.slice(0,3) + ")" + d.slice(3,6) + "-" + d.slice(6);
+}
+
+function validEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validCheckNumber(value) {
+  return /^[A-Za-z0-9-]+$/.test(value);
+}
+
+function updateTotals() {
+  let total = 0;
+  let bars = 0;
+
+  document.querySelectorAll(".qty-field").forEach(input => {
+    let qty = parseInt(input.value || "0", 10);
+    if (!Number.isFinite(qty) || qty < 0) qty = 0;
+    input.value = qty;
+    const subtotal = qty * PRICE_PER_BAR;
+    document.querySelector(`.subtotal[data-key="${input.dataset.key}"]`).textContent = "$" + subtotal.toFixed(2);
+    total += subtotal;
+    bars += qty;
+  });
+
+  document.getElementById("barsSold").textContent = bars;
+  document.getElementById("grandTotal").textContent = "$" + total.toFixed(2);
+  calculateChange();
+}
+
+function calculateChange() {
+  const total = parseMoney(document.getElementById("grandTotal").textContent);
+  const paymentType = document.querySelector('input[name="paymentType"]:checked')?.value || "Cash";
+  if (paymentType !== "Cash") {
+    document.getElementById("changeDue").textContent = "$0.00";
+    return;
+  }
+  const cash = parseMoney(document.getElementById("cashTendered").value);
+  const change = cash - total;
+  document.getElementById("changeDue").textContent = "$" + Math.max(change, 0).toFixed(2);
+}
+
+function togglePaymentFields() {
+  const type = document.querySelector('input[name="paymentType"]:checked')?.value || "Cash";
+  const cashWrap = document.getElementById("cashWrap");
+  const numWrap = document.getElementById("checkNumberWrap");
+  const photoWrap = document.getElementById("checkPhotoWrap");
+
+  cashWrap.classList.toggle("hidden", type !== "Cash");
+  numWrap.classList.toggle("hidden", type === "Cash");
+  photoWrap.classList.toggle("hidden", type === "Cash");
+  calculateChange();
+}
+
+function toggleReceiptFields() {
+  const type = document.querySelector('input[name="receiptType"]:checked')?.value || "None";
+  document.getElementById("receiptEmailWrap").classList.toggle("hidden", type !== "Email");
+  document.getElementById("receiptPhoneWrap").classList.toggle("hidden", type !== "Text");
+}
+
+function status(msg, good=false) {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.style.color = good ? "#0b7a34" : "#b91c1c";
+}
+
+function showWarning(msg) {
+  const box = document.getElementById("warningBox");
+  if (!msg) {
+    box.classList.add("hidden");
+    box.textContent = "";
+    return;
+  }
+  box.textContent = msg;
+  box.classList.remove("hidden");
+}
+
+function resetForm() {
+  document.querySelectorAll(".qty-field").forEach(el => el.value = "0");
+  document.getElementById("cashTendered").value = "";
+  document.getElementById("checkNumber").value = "";
+  document.getElementById("checkPhoto").value = "";
+  document.getElementById("receiptEmail").value = "";
+  document.getElementById("receiptPhone").value = "";
+  document.getElementById("sellerName").value = "";
+  document.querySelector('input[name="paymentType"][value="Cash"]').checked = true;
+  document.querySelector('input[name="receiptType"][value="None"]').checked = true;
+  checkPhotoData = "";
+  document.getElementById("checkPreviewWrap").style.display = "none";
+  document.getElementById("salesForm").style.display = "";
+  document.getElementById("successBox").style.display = "none";
+  status("");
+  showWarning("");
+  togglePaymentFields();
+  toggleReceiptFields();
+  updateTotals();
+}
+
+function fileToCompressedDataUrl(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        const ratio = Math.min(1, maxSize / Math.max(width, height));
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if (!e.target.matches(".qty-btn")) return;
+  const key = e.target.dataset.key;
+  const action = e.target.dataset.action;
+  const input = document.querySelector(`.qty-field[data-key="${key}"]`);
+  let qty = parseInt(input.value || "0", 10);
+  if (!Number.isFinite(qty) || qty < 0) qty = 0;
+  qty += action === "plus" ? 1 : -1;
+  if (qty < 0) qty = 0;
+  input.value = qty;
+  updateTotals();
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.matches(".qty-field")) {
+    e.target.value = String(e.target.value).replace(/[^\d]/g, "");
+    updateTotals();
+  }
+});
+
+document.getElementById("cashTendered").addEventListener("input", calculateChange);
+document.getElementById("cashTendered").addEventListener("blur", (e) => formatMoneyInput(e.target));
+document.getElementById("receiptPhone").addEventListener("input", (e) => e.target.value = formatPhone(e.target.value));
+document.querySelectorAll('input[name="paymentType"]').forEach(el => el.addEventListener("change", togglePaymentFields));
+document.querySelectorAll('input[name="receiptType"]').forEach(el => el.addEventListener("change", toggleReceiptFields));
+document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+document.getElementById("checkPhoto").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) {
+    checkPhotoData = "";
+    document.getElementById("checkPreviewWrap").style.display = "none";
+    return;
+  }
+  try {
+    checkPhotoData = await fileToCompressedDataUrl(file, 1000, 0.65);
+    document.getElementById("checkPreview").src = checkPhotoData;
+    document.getElementById("checkPreviewWrap").style.display = "block";
+  } catch (err) {
+    checkPhotoData = "";
+    status("Could not process the uploaded payment image.");
+  }
+});
+
+document.getElementById("salesForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const paymentType = document.querySelector('input[name="paymentType"]:checked')?.value || "Cash";
+  const receiptType = document.querySelector('input[name="receiptType"]:checked')?.value || "None";
+
+  const items = FLAVORS.map(f => {
+    const qty = parseInt(document.querySelector(`.qty-field[data-key="${f.key}"]`).value || "0", 10) || 0;
+    return { key: f.key, label: f.label, qty, subtotal: Number((qty * PRICE_PER_BAR).toFixed(2)) };
+  }).filter(i => i.qty > 0);
+
+  const totalBars = items.reduce((sum, item) => sum + item.qty, 0);
+  const grandTotal = Number(items.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
+  const cashTendered = parseMoney(document.getElementById("cashTendered").value);
+  const changeDue = paymentType === "Cash" ? Number(Math.max(cashTendered - grandTotal, 0).toFixed(2)) : 0;
+
+  if (!items.length) {
+    status("Enter at least one candy bar sale.");
+    return;
+  }
+
+  if (paymentType === "Cash" && cashTendered < grandTotal) {
+    status("Cash tendered must be at least the grand total.");
+    return;
+  }
+
+  if (paymentType !== "Cash") {
+    const checkNumber = document.getElementById("checkNumber").value.trim();
+    if (!checkNumber || !validCheckNumber(checkNumber)) {
+      status("Enter a valid check or money order number.");
+      return;
+    }
+    if (!checkPhotoData) {
+      status("Upload a photo of the front of the check or money order.");
+      return;
+    }
+  }
+
+  if (receiptType === "Email" && !validEmail(document.getElementById("receiptEmail").value.trim())) {
+    status("Enter a valid receipt email address.");
+    return;
+  }
+
+  if (receiptType === "Text" && document.getElementById("receiptPhone").value.replace(/\D/g, "").length !== 10) {
+    status("Enter a valid receipt phone number.");
+    return;
+  }
+
+  const payload = {
+    formType: "chocolate_sales",
+    sellerName: document.getElementById("sellerName").value.trim(),
+    items,
+    totalBars,
+    grandTotal: grandTotal.toFixed(2),
+    paymentType,
+    cashTendered: cashTendered ? cashTendered.toFixed(2) : "",
+    changeDue: changeDue.toFixed(2),
+    checkNumber: document.getElementById("checkNumber").value.trim(),
+    checkPhoto: checkPhotoData,
+    receiptType,
+    receiptEmail: document.getElementById("receiptEmail").value.trim(),
+    receiptPhone: document.getElementById("receiptPhone").value.trim()
+  };
+
+  if (!payload.sellerName) {
+    status("Enter the seller name.");
+    return;
+  }
+
+  status("Submitting...", true);
+  showWarning("");
+
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (json.ok) {
+      document.getElementById("salesForm").style.display = "none";
+      const success = document.getElementById("successBox");
+      success.innerHTML = `<strong>Sale completed.</strong><br>Transaction ID: ${escapeHtml(json.transactionId || "")}<br>Grand Total: $${escapeHtml(payload.grandTotal)}<br>Change Due: $${escapeHtml(payload.changeDue)}${json.warning ? "<br><br><strong>Note:</strong> " + escapeHtml(json.warning) : ""}`;
+      success.style.display = "block";
+      status("");
+      if (json.warning) showWarning(json.warning);
+    } else {
+      status(json.error || "Submission failed.");
+    }
+  } catch (err) {
+    status("Submission failed.");
+  }
+});
+
+initHero();
+initRows();
+togglePaymentFields();
+toggleReceiptFields();
+updateTotals();
+</script>
+</body>
+</html>
